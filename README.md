@@ -1,2 +1,3 @@
 # TanksForTheMemories
-Stripped down differential tank
+Stripped down differential tank to quickly prototype with.
+

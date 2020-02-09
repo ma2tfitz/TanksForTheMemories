@@ -8,7 +8,10 @@
 package frc.robot;
 
 import java.util.StringJoiner;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
+// import edu.wpi.first.wpilibj.SpeedControllerGroup;
+// import edu.wpi.first.wpilibj.command.Scheduler;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpiutil.math.MathUtil;
@@ -35,8 +38,16 @@ final class LimeLightSubsystem {
     return limeLight.getEntry("tv").getDouble(0.0) > 0.0;
   }
 
-  public double getCrosshairErrorX() {
+  public double getX() {
     return limeLight.getEntry("tx").getDouble(0.0);
+  }
+
+  public double getY() {
+    return limeLight.getEntry("ty").getDouble(0.0);
+  }
+
+  public double getArea() {
+    return limeLight.getEntry("ta").getDouble(0.0);
   }
 
 }
@@ -70,6 +81,14 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void robotPeriodic() {
+    SmartDashboard.putBoolean("Limelight has target", m_limeLight.hasTarget());
+    SmartDashboard.putNumber("Limelight tx", m_limeLight.getX());
+    SmartDashboard.putNumber("Limelight ty", m_limeLight.getY());
+    SmartDashboard.putNumber("Limelight Area", m_limeLight.getArea());
+  }
+
+  @Override
   public void teleopPeriodic() {
     final double K = 0.3;
     final double leftSpeed = driverXbox.getRawAxis(1);
@@ -85,15 +104,33 @@ public class Robot extends TimedRobot {
     double leftSpeed = 0.0;
     double rightSpeed = 0.0;
 
+    if (this.isOperatorControl()) {
+      System.out.println("INFO: autonomousPeriodic called during teleop");
+      return;
+    }
+
     if (m_limeLight.hasTarget()) {
       leftSpeed = 0.0;
       rightSpeed = 0.0;
     } else {
-      double speed = m_limeLight.getCrosshairErrorX() * K_TURN;
+      double speed = m_limeLight.getX() * K_TURN;
       speed = MathUtil.clamp(speed, - MAX_SPEED, MAX_SPEED);
       leftSpeed = speed;
       rightSpeed = -speed;
     }
     m_myRobot.tankDrive(leftSpeed, rightSpeed);
   }
+
+  @Override
+  public void disabledInit() {
+    // Ensure stopped on mode change
+    m_myRobot.tankDrive(0.0, 0.0);
+  }
+
+  @Override
+  public void testInit() {
+    // Ensure stopped on mode change
+    m_myRobot.tankDrive(0.0, 0.0);
+  }
+
 }
