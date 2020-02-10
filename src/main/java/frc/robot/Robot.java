@@ -24,7 +24,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
  * Wrap up some limelight-related stuff; move to subsystem
  */
 final class LimeLightSubsystem {
-  private final NetworkTable limeLight = NetworkTableInstance.getDefault().getTable("limeLight");
+  private final NetworkTable limeLight = NetworkTableInstance.getDefault().getTable("limelight");
 
   public LimeLightSubsystem(int pipeline) {
     limeLight.getEntry("pipeline").setNumber(pipeline);
@@ -66,8 +66,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     
-    frontRightMotor.setInverted(true);
-    backRightMotor.setInverted(true);
+    //frontRightMotor.setInverted(true);
+    //backRightMotor.setInverted(true);
 
     backLeftMotor.follow(frontLeftMotor);
     backRightMotor.follow(frontRightMotor);
@@ -97,8 +97,16 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {
-    final double K_TURN = 0.02;
+  public void autonomousInit() {
+    super.autonomousInit();
+
+  }
+
+  @Override
+  public void autonomousPeriodic() { 
+
+
+    final double K_TURN = 0.25;
     final double MAX_SPEED = 0.25;
 
     double leftSpeed = 0.0;
@@ -109,7 +117,7 @@ public class Robot extends TimedRobot {
       return;
     }
 
-    if (m_limeLight.hasTarget()) {
+    if (!m_limeLight.hasTarget()) {
       leftSpeed = 0.0;
       rightSpeed = 0.0;
     } else {
@@ -118,6 +126,8 @@ public class Robot extends TimedRobot {
       leftSpeed = speed;
       rightSpeed = -speed;
     }
+    SmartDashboard.putNumber("Left Speed", leftSpeed);
+    SmartDashboard.putNumber("Right Speed", rightSpeed);
     m_myRobot.tankDrive(leftSpeed, rightSpeed);
   }
 
