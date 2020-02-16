@@ -7,18 +7,18 @@
 
 package frc.robot;
 
-import java.util.StringJoiner;
 // import edu.wpi.first.wpilibj.SpeedControllerGroup;
 // import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpiutil.math.MathUtil;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.networktables.*;
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.networktables.*;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpiutil.math.MathUtil;
 
 /*
  * Wrap up some limelight-related stuff; move to subsystem
@@ -63,17 +63,28 @@ public class Robot extends TimedRobot {
   private final CANSparkMax backLeftMotor = new CANSparkMax(3, MotorType.kBrushless);
   private final CANSparkMax backRightMotor = new CANSparkMax(4, MotorType.kBrushless);
 
-  @Override
-  public void robotInit() {
-    
+  private CANEncoder m_frontLeftEncoder = new CANEncoder(frontLeftMotor);
+  private CANEncoder m_frontRightEncoder = new CANEncoder(frontRightMotor);
+  private CANEncoder m_backLeftEncoder = new CANEncoder(backLeftMotor);
+  private CANEncoder m_backRightEncoder = new CANEncoder(backRightMotor);
+
+  private void configureDriveMotors() {
     //frontRightMotor.setInverted(true);
     //backRightMotor.setInverted(true);
 
     backLeftMotor.follow(frontLeftMotor);
     backRightMotor.follow(frontRightMotor);
-    // Should be able to pass in Master for each side rather than group explicitly
-    // SpeedControllerGroup leftGroup = new SpeedControllerGroup(frontLeftMotor, backLeftMotor);
-    // SpeedControllerGroup rightGroup = new SpeedControllerGroup(frontRightMotor, backRightMotor);
+
+    m_frontLeftEncoder.setPosition(0.0);
+    m_frontRightEncoder.setPosition(0.0);
+    m_backLeftEncoder.setPosition(0.0);
+    m_backRightEncoder.setPosition(0.0);
+  }
+
+  @Override
+  public void robotInit() {
+    
+    configureDriveMotors();
 
     m_myRobot = new DifferentialDrive(frontLeftMotor, frontRightMotor);
     m_limeLight = new LimeLightSubsystem();
@@ -82,10 +93,35 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putBoolean("Limelight has target", m_limeLight.hasTarget());
-    SmartDashboard.putNumber("Limelight tx", m_limeLight.getX());
-    SmartDashboard.putNumber("Limelight ty", m_limeLight.getY());
-    SmartDashboard.putNumber("Limelight Area", m_limeLight.getArea());
+    // SmartDashboard.putBoolean("Limelight has target", m_limeLight.hasTarget());
+    // SmartDashboard.putNumber("Limelight tx", m_limeLight.getX());
+    // SmartDashboard.putNumber("Limelight ty", m_limeLight.getY());
+    // SmartDashboard.putNumber("Limelight Area", m_limeLight.getArea());
+
+    SmartDashboard.putNumber("FL CPR", m_frontLeftEncoder.getCountsPerRevolution());
+    SmartDashboard.putNumber("FR CPR", m_frontRightEncoder.getCountsPerRevolution());
+    SmartDashboard.putNumber("BL CPR", m_backLeftEncoder.getCountsPerRevolution());
+    SmartDashboard.putNumber("BR CPR", m_backRightEncoder.getCountsPerRevolution());
+
+    SmartDashboard.putNumber("FL PCF", m_frontLeftEncoder.getPositionConversionFactor());
+    SmartDashboard.putNumber("FR PCF", m_frontRightEncoder.getPositionConversionFactor());
+    SmartDashboard.putNumber("BL PCF", m_backLeftEncoder.getPositionConversionFactor());
+    SmartDashboard.putNumber("BR PCF", m_backRightEncoder.getPositionConversionFactor());
+
+    SmartDashboard.putNumber("FL VCF", m_frontLeftEncoder.getVelocityConversionFactor());
+    SmartDashboard.putNumber("FR VCF", m_frontRightEncoder.getVelocityConversionFactor());
+    SmartDashboard.putNumber("BL VCF", m_backLeftEncoder.getVelocityConversionFactor());
+    SmartDashboard.putNumber("BR VCF", m_backRightEncoder.getVelocityConversionFactor());
+
+    SmartDashboard.putNumber("FL s", m_frontLeftEncoder.getPosition());
+    SmartDashboard.putNumber("FR s", m_frontRightEncoder.getPosition());
+    SmartDashboard.putNumber("BL s", m_backLeftEncoder.getPosition());
+    SmartDashboard.putNumber("BR s", m_backRightEncoder.getPosition());
+
+    SmartDashboard.putNumber("FL v", m_frontLeftEncoder.getVelocity());
+    SmartDashboard.putNumber("FR v", m_frontRightEncoder.getVelocity());
+    SmartDashboard.putNumber("BL v", m_backLeftEncoder.getVelocity());
+    SmartDashboard.putNumber("BR v", m_backRightEncoder.getVelocity());
   }
 
   @Override
